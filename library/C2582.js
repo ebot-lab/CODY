@@ -9,24 +9,25 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const os = require('os');
 
-// Default images
+// Default images for welcome/goodbye (fallback when profile picture fails)
 const DEFAULT_WELCOME_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0df4f-b4c4-4bec-b842-597e6b332e72.jpeg';
 const DEFAULT_GOODBYE_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0df4f-b4c4-4bec-b842-597e6b332e72.jpeg';
 
 // Group invite link
 const GROUP_INVITE_LINK = 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax';
 const GROUP_JID = '120363396903069780@g.us';
+// This image is used for the connection message (ALWAYS, ignoring config.thumbUrl)
 const GROUP_BUTTON_IMG = 'https://cdn.crysnovax.link/files/1778703456696-8e4695e8-e743-4fba-a83c-34265545e40d.jpeg';
 
 // ── Send Connected Message to Owner (with Group Button) ──
 const sendConnectedMessage = async (sock, config, port) => {
     const ownerJid = `${config.owner}@s.whatsapp.net`;
-    const thumbUrl = config.thumbUrl || GROUP_BUTTON_IMG;
+    // ALWAYS use the hardcoded GROUP_BUTTON_IMG, ignore config.thumbUrl
+    const thumbUrl = GROUP_BUTTON_IMG;
 
     try {
-        // Fetch the custom image URL as buffer (NOT group profile pic)
+        // Fetch the image as buffer
         let thumbnail = null;
         try {
             const fetch = require('node-fetch');
@@ -47,19 +48,19 @@ const sendConnectedMessage = async (sock, config, port) => {
             `⃠⃝⃪⃔⃕ *BOT IS LIVE!* ✧\n` +
             `𓋴 Type *${config.settings?.prefix || '.'}menu* to get started\n\n`;
 
-        // Send with externalAdReply 
+        // Send with externalAdReply
         if (thumbnail) {
             try {
                 await sock.sendMessage(ownerJid, {
                     text: caption,
                     externalAdReply: {
-                        title: 'ஃ𖠃 JOIN CODY AI GROUP ',
+                        title: 'ஃ𖠃 JOIN CODY AI GROUP',
                         body: '╰┈➤ Click to join official group\n𓋴 Get support & updates',
-                        thumbnail,                    // 
-                        largeThumbnail: true,           // 
-                        url: GROUP_INVITE_LINK,          // 
-                        showAdAttribution: true,         // 
-                        mediaType: 1                    // 
+                        thumbnail: thumbnail,
+                        largeThumbnail: true,
+                        url: GROUP_INVITE_LINK,
+                        showAdAttribution: true,
+                        mediaType: 1
                     }
                 });
                 console.log(chalk.green('✅ Connected message sent to owner (with custom image thumbnail)'));
