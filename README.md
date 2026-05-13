@@ -9,9 +9,9 @@
 
 
 
-<div align="center">
+<!--<div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=00ff66&height=90&section=footer" style="margin-top:-30px;" />
-</p>
+</p>-->
 <img src="https://i.imgur.com/dBaSKWF.gif" height="20" width="100%">
 
 <p align="center">
