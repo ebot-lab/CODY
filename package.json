@@ -1,7 +1,7 @@
 {
-  "name": "zee-bot-v2",
-  "version": "2.8.8.4",
-  "description": "ZEE BOT V2 — Powered by CRYSNOVA AI V2 Technology",
+  "name": "CODY-AI",
+  "version": "1.0.0",
+  "description": "CODY AI — Powered by CRYSNOVA AI V2 Technology",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -13,6 +13,8 @@
     "bot",
     "baileys",
     "crysnova",
+    "cody",
+    "cody-ai",
     "zee-bot"
   ],
   "author": "𝓬𝓻𝔂𝓼𝓷𝓸𝓿𝓪𝔁 𝓿𝓮𝓻𝓲𝓯𝓲𝓮𝓭‎",
