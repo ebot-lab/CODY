@@ -37,13 +37,13 @@ module.exports = {
       if (cmd === '.vv' && args[0] === 'cmd' && args[1]) {
         reactionTriggers[sender] = args[1];
         saveTriggers();
-        return reply(`╭─❍ *CRYSNOVA AI V2.0*\n│ ✓ Reaction trigger set: ${args[1]}\n╰──────────────────`);
+        return reply(`╭─❍ *CODY AI V2.0*\n│ ✓ Reaction trigger set: ${args[1]}\n╰──────────────────`);
       }
 
       // ───── MUST REPLY ─────
       let quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
       if (!quoted) {
-        return reply('╭─❍ *CRYSNOVA AI V2.0*\n│ ✘ Reply to a view-once message.\n╰──────────────────');
+        return reply('╭─❍ *CODY AI V2.0*\n│ ✘ Reply to a view-once message.\n╰──────────────────');
       }
 
       // unwrap ephemeral
@@ -56,7 +56,7 @@ module.exports = {
 
       // ───── SUPPORTED TYPES ─────
       if (!['imageMessage','videoMessage','stickerMessage','audioMessage'].includes(type)) {
-        return reply('╭─❍ *CRYSNOVA AI V2.0*\n│ ✘ Only view-once media/audio supported.\n╰──────────────────');
+        return reply('╭─❍ *CODY AI V2.0*\n│ ✘ Only view-once media/audio supported.\n╰──────────────────');
       }
 
       // ───── DOWNLOAD BUFFER ─────
@@ -82,21 +82,21 @@ module.exports = {
           ? 'audio'
           : null;
 
-      if (!sendType) return reply('╭─❍ *CRYSNOVA AI V2.0*\n│ ✘ Unsupported type.\n╰──────────────────');
+      if (!sendType) return reply('╭─❍ *CODY AI V2.0*\n│ ✘ Unsupported type.\n╰──────────────────');
 
       // ───── PRIVATE (.vvp) ─────
       if (cmd === '.vvp') {
         await sock.sendMessage(sender, {
           [sendType]: buffer,
-          caption: `╭─❍ *CRYSNOVA AI V2.0*\n│ ✓ View-once saved privately.\n╰──────────────────`
+          caption: `╭─❍ *CODY AI V2.0*\n│ ✓ View-once saved privately.\n╰──────────────────`
         });
-        return reply('╭─❍ *CRYSNOVA AI V2.0*\n│ ✓ Sent to your DM.\n╰──────────────────');
+        return reply('╭─❍ *CODY AI V2.0*\n│ ✓ Sent to your DM.\n╰──────────────────');
       }
 
       // ───── NORMAL (.vv) ─────
       await sock.sendMessage(m.chat, {
         [sendType]: buffer,
-        caption: `╭─❍ *CRYSNOVA AI V2.0*\n│ ✓ View-once unlocked.\n╰──────────────────`
+        caption: `╭─❍ *CODY AI V2.0*\n│ ✓ View-once unlocked.\n╰──────────────────`
       }, { quoted: m });
 
       // ───── ATTACH REACTION LISTENER ONCE ─────
@@ -147,7 +147,7 @@ module.exports = {
 
             await sock.sendMessage(reactor, {
               [st]: buf,
-              caption: `╭─❍ *CRYSNOVA AI V2.0*\n│ ✓ View-once saved via reaction ${reactedEmoji}\n╰──────────────────`
+              caption: `╭─❍ *CODY AI V2.0*\n│ ✓ View-once saved via reaction ${reactedEmoji}\n╰──────────────────`
             });
 
           } catch {}
@@ -156,7 +156,7 @@ module.exports = {
 
     } catch (err) {
       console.error('[VV ERROR]', err);
-      reply('╭─❍ *CRYSNOVA AI V2.0*\n│ ✘ Error unlocking view-once.\n╰──────────────────');
+      reply('╭─❍ *CODY AI V2.0*\n│ ✘ Error unlocking view-once.\n╰──────────────────');
     }
   }
 };
