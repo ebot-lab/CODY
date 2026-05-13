@@ -1,0 +1,20 @@
+{
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ],
+  "env": {
+    "OWNER_NUMBER": "@owner_number",
+    "OWNER_NAME": "@owner_name",
+    "BOT_NAME": "@bot_name",
+    "SESSION_ID": "@session_id"
+  }
+}
