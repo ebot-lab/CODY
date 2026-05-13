@@ -9,46 +9,69 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
+const os = require('os');
 
 // Default images
 const DEFAULT_WELCOME_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0df4f-b4c4-4bec-b842-597e6b332e72.jpeg';
 const DEFAULT_GOODBYE_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0df4f-b4c4-4bec-b842-597e6b332e72.jpeg';
 
-// ── Send Connected Message to Owner ──
+// Group invite link
+const GROUP_INVITE_LINK = 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax';
+const GROUP_JID = '120363396903069780@g.us';
+const GROUP_BUTTON_IMG = 'https://cdn.crysnovax.link/files/1778703456696-8e4695e8-e743-4fba-a83c-34265545e40d.jpeg';
+
+// ── Send Connected Message to Owner (with Group Button) ──
 const sendConnectedMessage = async (sock, config, port) => {
     const ownerJid = `${config.owner}@s.whatsapp.net`;
-    const groupLink = config.branding?.group || 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax';
-    const thumbUrl = config.thumbUrl || 'https://files.catbox.moe/z2rqc1.jpg';
+    const thumbUrl = config.thumbUrl || GROUP_BUTTON_IMG;
 
     try {
-        await sock.sendMessage(ownerJid, {
-            image: { url: thumbUrl },
-            caption:
-                `𓂋⃝⃟⃟⃝⃪⃔ *${config.settings?.title || 'CODY AI'}* ×͜×☠︎︎ ONLINE\n\n` +
-                `❏▸ ⟁⃝𓋎 User ⇆ ${sock.user?.name || 'CODY AI'}\n` +
-                `❏▸ 彡 Prefix ⇆ [ ${config.settings?.prefix || '.'} ]\n` +
-                `❏▸ ⎔ Mode ⇆ ${config.status?.public ? 'Public' : 'Private'}\n` +
-                `❏▸ ⓘ Version ⇆ CODY AI v2.0.0\n` +
-                `❏▸ ℘ Owner ⇆ ${config.settings?.ownerName || 'CRYSNOVA'}\n` +
-                `❏▸ 🌐 Dashboard ⇆ http://localhost:${port}\n\n` +
-                `💫 JOIN GROUP: ${groupLink}\n\n` +
-                `⃠⃝⃪⃔⃕ *BOT IS LIVE!* ✧\n` +
-                `𓋴 Type *${config.settings?.prefix || '.'}menu* to get started`,
-            contextInfo: {
-                isForwarded: true,
-                forwardingScore: 999,
-                externalAdReply: {
-                    title: config.settings?.title || 'CODY AI',
-                    body: '⚡ Powered by CRYSNOVA AI',
-                    sourceUrl: 'https://whatsapp.com/channel/0029Vb6pe77K0IBn48HLKb38',
-                    thumbnailUrl: thumbUrl,
-                    mediaType: 1,
-                    renderLargerThumbnail: false,
-                    showAdAttribution: true
-                }
+        // Fetch the custom image URL as buffer (NOT group profile pic)
+        let thumbnail = null;
+        try {
+            const fetch = require('node-fetch');
+            thumbnail = await fetch(thumbUrl).then(r => r.buffer());
+        } catch (e) {
+            console.log(chalk.yellow('[Thumbnail fetch failed]'), e.message);
+        }
+
+        // Build caption
+        const caption = 
+            `┏━〔 ✦𓂋⃝⃟⃟⃝⃪⃔ *CODY AI* 〕━━\n\n` +
+            `❏▸ ⟁⃝𓋎 Status: *ONLINE* ×͜×☠︎︎\n` +
+            `❏▸ 彡 Prefix: [ ${config.settings?.prefix || '.'} ]\n` +
+            `❏▸ ⎔ Mode: ${config.status?.public ? 'Public' : 'Private'}\n` +
+            `❏▸ ⓘ Version: CODY AI v2.0.0\n` +
+            `❏▸ ℘ Owner: ${config.settings?.ownerName || 'CRYSNOVA'}\n` +
+            `❏▸ ஃ𖠃 Dashboard: http://localhost:${port}\n\n` +
+            `⃠⃝⃪⃔⃕ *BOT IS LIVE!* ✧\n` +
+            `𓋴 Type *${config.settings?.prefix || '.'}menu* to get started\n\n`;
+
+        // Send with externalAdReply 
+        if (thumbnail) {
+            try {
+                await sock.sendMessage(ownerJid, {
+                    text: caption,
+                    externalAdReply: {
+                        title: 'ஃ𖠃 JOIN CODY AI GROUP ',
+                        body: '╰┈➤ Click to join official group\n𓋴 Get support & updates',
+                        thumbnail,                    // 
+                        largeThumbnail: true,           // 
+                        url: GROUP_INVITE_LINK,          // 
+                        showAdAttribution: true,         // 
+                        mediaType: 1                    // 
+                    }
+                });
+                console.log(chalk.green('✅ Connected message sent to owner (with custom image thumbnail)'));
+            } catch (e) {
+                console.log(chalk.red('[ExternalAdReply failed]'), e.message);
+                await sock.sendMessage(ownerJid, { text: caption });
             }
-        });
-        console.log(chalk.green('✅ Connected message sent to owner'));
+        } else {
+            await sock.sendMessage(ownerJid, { text: caption });
+            console.log(chalk.green('✅ Connected message sent to owner (text only)'));
+        }
+
     } catch (e) {
         console.log(chalk.red('[Connected msg failed]'), e.message);
     }
@@ -104,32 +127,32 @@ const setupGroupEvents = async (sock, ignoredErrors = []) => {
                     
                     await sock.sendMessage(update.id, {
                         image: { url: userPic || groupPic },
-                        caption: `┏━〔 ✦𓂋⃝⃟⃟⃝⃪⃔ *WELCOME* 〕━\n\n` +
+                        caption: `┏━〔 ✦𓂋⃝⃟⃟⃝⃪⃔ *WELCOME* 〕━━\n\n` +
                                  `❏┃ @${jidNum}\n` +
                                  `❏┃ ⓘ Joined *${subject}*\n` +
                                  `❏┃ ஃ𖠃 Members: ${count}\n` +
                                  `❏┃ 𓀀 ${welcomeMsg}\n\n` +
                                  ` Enjoy your stay! ✧‎\n` +
-                                 `( ͡❛ ₃ ͡❛)\n` +
-                                 `━━━━━━━━━━━━━━━━`,
+                                 `( ͡❛ ₃ ͡❛)\n` +
+                                 `━━━━━━━━━━━━━━━━━`,
                         mentions: [jid]
                     });
                 }
                 
-                // ── GOODBYE MESSAGE (with your exact style) ──
+                // ── GOODBYE MESSAGE ──
                 if (update.action === 'remove') {
                     const goodbyeMsg = evDB[update.id].goodbye || 'Goodbye!';
                     
                     await sock.sendMessage(update.id, {
                         image: { url: userPic || groupPic },
-                        caption: `┏━〔 ✦⃠⃝⃪⃔⃕ *GOODBYE* 〕━\n\n` +
+                        caption: `┏━〔 ✦⃠⃝⃪⃔⃕ *GOODBYE* 〕━━\n\n` +
                                  `❏┃ @${jidNum}\n` +
                                  `❏┃ ⓘ Left *${subject}*\n` +
                                  `❏┃ ஃ𖠃 Members: ${count}\n` +
                                  `❏┃ 𓀀 ${goodbyeMsg}\n\n` +
                                  ` We'll miss you! ✧‎\n` +
-                                 `( ͡❛ ₃ ͡❛)\n` +
-                                 `━━━━━━━━━━━━━━━━`,
+                                 `( ͡❛ ₃ ͡❛)\n` +
+                                 `━━━━━━━━━━━━━━━━━`,
                         mentions: [jid]
                     });
                 }
