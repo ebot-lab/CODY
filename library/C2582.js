@@ -39,12 +39,12 @@ const sendConnectedMessage = async (sock, config, port) => {
         // Build caption
         const caption = 
             `┏━〔 ✦𓂋⃝⃟⃟⃝⃪⃔ *CODY AI* 〕━━\n\n` +
-            `❏▸ ⟁⃝𓋎 Status: *ONLINE* ×͜×☠︎︎\n` +
-            `❏▸ 彡 Prefix: [ ${config.settings?.prefix || '.'} ]\n` +
-            `❏▸ ⎔ Mode: ${config.status?.public ? 'Public' : 'Private'}\n` +
-            `❏▸ ⓘ Version: CODY AI v2.0.0\n` +
-            `❏▸ ℘ Owner: ${config.settings?.ownerName || 'CRYSNOVA'}\n` +
-            `❏▸ ஃ𖠃 Dashboard: http://localhost:${port}\n\n` +
+            `❏▸ *⟁⃝𓋎 Status* ⇆ *ONLINE* ×͜×☠︎︎\n` +
+            `❏▸ *彡 Prefix* ⇆ [ ${config.settings?.prefix || '.'} ]\n` +
+            `❏▸ *⎔ Mode* ⇆ ${config.status?.public ? 'Public' : 'Private'}\n` +
+            `❏▸ *ⓘ Version* ⇆ CODY AI v2.0.0\n` +
+            `❏▸ *℘ Owner* ⇆ ${config.settings?.ownerName || 'CRYSNOVA'}\n` +
+            `❏▸ *ஃ𖠃 Dashboard* ⇆ http://localhost:${port}\n\n` +
             `⃠⃝⃪⃔⃕ *BOT IS LIVE!* ✧\n` +
             `𓋴 Type *${config.settings?.prefix || '.'}menu* to get started\n\n`;
 
@@ -55,7 +55,7 @@ const sendConnectedMessage = async (sock, config, port) => {
                     text: caption,
                     externalAdReply: {
                         title: 'ஃ𖠃 JOIN CODY AI GROUP',
-                        body: '╰┈➤ Click to join official group\n𓋴 Get support & updates',
+                       body: '╰┈➤ Click to join official group\n𓋴 Get support & updates',
                         thumbnail: thumbnail,
                         largeThumbnail: true,
                         url: GROUP_INVITE_LINK,
@@ -131,7 +131,7 @@ const setupGroupEvents = async (sock, ignoredErrors = []) => {
                         caption: `┏━〔 ✦𓂋⃝⃟⃟⃝⃪⃔ *WELCOME* 〕━━\n\n` +
                                  `❏┃ @${jidNum}\n` +
                                  `❏┃ ⓘ Joined *${subject}*\n` +
-                                 `❏┃ ஃ𖠃 Members: ${count}\n` +
+                                 `❏┃ *ஃ𖠃 Members:* ${count}\n` +
                                  `❏┃ 𓀀 ${welcomeMsg}\n\n` +
                                  ` Enjoy your stay! ✧‎\n` +
                                  `( ͡❛ ₃ ͡❛)\n` +
@@ -149,7 +149,7 @@ const setupGroupEvents = async (sock, ignoredErrors = []) => {
                         caption: `┏━〔 ✦⃠⃝⃪⃔⃕ *GOODBYE* 〕━━\n\n` +
                                  `❏┃ @${jidNum}\n` +
                                  `❏┃ ⓘ Left *${subject}*\n` +
-                                 `❏┃ ஃ𖠃 Members: ${count}\n` +
+                                 `❏┃ *ஃ𖠃 Members:* ${count}\n` +
                                  `❏┃ 𓀀 ${goodbyeMsg}\n\n` +
                                  ` We'll miss you! ✧‎\n` +
                                  `( ͡❛ ₃ ͡❛)\n` +
