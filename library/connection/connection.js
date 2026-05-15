@@ -115,7 +115,8 @@ async function createSocket(sessionId) {
         connectTimeoutMs:           60_000,
         defaultQueryTimeoutMs:      60_000,
         shouldSyncHistoryMessage:   () => false,
-        getMessage:                 async () => ({ conversation: '' })
+      //  getMessage:                 async () => ({ conversation: '' })
+        
     });
 
     return { sock, saveCreds, state };
