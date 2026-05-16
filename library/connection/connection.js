@@ -1,6 +1,6 @@
 /**
  * CODY AI — Connection Manager
- * CommonJS version (compatible with "type": "commonjs")
+ * Supports: Base64 sessions, Cloudflare KV short IDs, Gzip-compressed
  */
 
 const {
@@ -25,9 +25,70 @@ async function getAuthState() {
     return await useMultiFileAuthState(SESSION_PATH);
 }
 
+/**
+ * Download session from Cloudflare KV
+ * @param {string} shortId - The short ID (e.g., "la9fljbp")
+ * @returns {Promise<string | null>}
+ */
+async function downloadFromKV(shortId) {
+    try {
+        const CF_WORKER_URL = 'https://id.crysnovax.link';
+        const response = await fetch(`${CF_WORKER_URL}/load/${shortId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log(`✅ Session loaded from Cloudflare KV for ${result.phone}`);
+            return result.sessionData;
+        } else {
+            console.log(`❌ KV session not found: ${result.error}`);
+            return null;
+        }
+    } catch (err) {
+        console.error('❌ KV download failed:', err.message);
+        return null;
+    }
+}
+
+/**
+ * Decode SESSION_ID — supports:
+ * - Cloudflare KV short ID: CODY_AI!KV:xxxx
+ * - Plain base64: CODY_AI!eyJjcmVkcyI6...
+ * - Gzip-compressed base64
+ */
 async function decodeSession(sessionId) {
     if (!sessionId || typeof sessionId !== 'string') return false;
 
+    // ── CLOUDFLARE KV SHORT ID ──
+    if (sessionId.startsWith('CODY_AI!KV:')) {
+        const shortId = sessionId.replace('CODY_AI!KV:', '');
+        console.log('📦 Fetching session from Cloudflare KV. Short ID:', shortId);
+        
+        const sessionJson = await downloadFromKV(shortId);
+        if (!sessionJson) {
+            console.log('❌ Failed to fetch session from KV');
+            return false;
+        }
+        
+        try {
+            const creds = JSON.parse(sessionJson);
+            if (!fs.existsSync(SESSION_PATH)) {
+                fs.mkdirSync(SESSION_PATH, { recursive: true });
+            }
+            
+            fs.writeFileSync(
+                path.join(SESSION_PATH, 'creds.json'),
+                JSON.stringify(creds, null, 2)
+            );
+            
+            console.log('✅ Session restored from Cloudflare KV');
+            return true;
+        } catch (err) {
+            console.log('❌ Failed to parse KV session:', err.message);
+            return false;
+        }
+    }
+
+    // ── BASE64 / COMPRESSED SESSION ──
     let base64 = sessionId.trim();
     if (base64.includes('!')) {
         base64 = base64.split('!').pop();
@@ -58,7 +119,7 @@ async function decodeSession(sessionId) {
             JSON.stringify(creds, null, 2)
         );
 
-        console.log('🔐 Session restored successfully');
+        console.log('🔐 Session restored from base64');
         return true;
     } catch (err) {
         console.log('❌ Failed to decode session:', err.message);
