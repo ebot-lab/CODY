@@ -1,21 +1,22 @@
 /**
  * CODY AI — Connection Manager
  * Supports Mega session storage
+ * CommonJS version (compatible with "type": "commonjs")
  */
 
-import {
-    default as makeWASocket,
+const {
+    default: makeWASocket,
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
     Browsers,
     DisconnectReason
-} from '@crysnovax/baileys';
-import { Boom } from '@hapi/boom';
-import pino from 'pino';
-import fs from 'fs-extra';
-import path from 'path';
-import zlib from 'zlib';
-import { downloadSession } from './mega.js';
+} = require('@crysnovax/baileys');
+const { Boom } = require('@hapi/boom');
+const pino = require('pino');
+const fs = require('fs-extra');
+const path = require('path');
+const zlib = require('zlib');
+const { downloadSession } = require('./mega.js');
 
 const SESSION_PATH = './sessions';
 
@@ -180,7 +181,7 @@ const konek = async ({ sock, update, clientstart, DisconnectReason, Boom }) => {
     }
 };
 
-export {
+module.exports = {
     createSocket,
     getAuthState,
     decodeSession,
