@@ -4,11 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install
-    startCommand: node redirect.js && node index.js
-    disk:
-      name: database-storage
-      mountPath: /app/database
-      sizeGB: 1
+    startCommand: node index.js
     envVars:
       - key: NODE_VERSION
         value: 22
