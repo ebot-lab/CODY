@@ -33,14 +33,14 @@ async function getAuthState() {
 async function downloadFromKV(shortId) {
     try {
         const CF_WORKER_URL = 'https://id.crysnovax.link';
-        const response = await fetch(`${CF_WORKER_URL}/load/${shortId}`);
+        const response = await fetch(`${CF_WORKER_URL}/session/load/${shortId}`);
         const result = await response.json();
         
-        if (result.success) {
-            console.log(`✅ Session loaded from Cloudflare KV for ${result.phone}`);
-            return result.sessionData;
+        if (result.sessionData || result.data) {
+            console.log(`✅ Session loaded from Cloudflare KV`);
+            return result.sessionData || result.data;
         } else {
-            console.log(`❌ KV session not found: ${result.error}`);
+            console.log(`❌ KV session not found: ${result.error || 'No data'}`);
             return null;
         }
     } catch (err) {
