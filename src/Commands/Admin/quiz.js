@@ -29,7 +29,7 @@ module.exports = {
 
             const question = parts[0];
             const correctAnswer = parts[1];
-            const options = parts.slice(2, 4);
+            const options = parts.slice(2);
 
             await sock.sendMessage(chat, {
                 poll: {
