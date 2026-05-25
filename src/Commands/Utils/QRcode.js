@@ -11,10 +11,16 @@ module.exports = {
     owner: true,
 
     execute: async (sock, m, { args, reply }) => {
-        const cmd = (m.body || '').toLowerCase().split(/\s+/)[0].trim();
+        // Extract command name without prefix, lowercased
+        const rawCmd = (m.body || '').trim().toLowerCase().split(/\s+/)[0];
+        // Strip any leading prefix characters (., !, /, etc.)
+        const cmd = rawCmd.replace(/^[^a-z0-9]+/, '');
+
+        const generateCmds = ['qr', 'qrcode', 'makeqr'];
+        const readCmds     = ['qrread', 'readqr', 'scanqr', 'deqr'];
 
         // ── GENERATE QR ──────────────────────────────────────────────
-        if (['.qr', '.qrcode', '.makeqr'].includes(cmd)) {
+        if (generateCmds.includes(cmd)) {
             const text = args.join(' ').trim();
             if (!text) return reply('Provide text!\nExample: .qr https://example.com');
 
@@ -38,9 +44,8 @@ module.exports = {
         }
 
         // ── READ QR ───────────────────────────────────────────────────
-        else if (['.qrread', '.readqr', '.scanqr', '.deqr'].includes(cmd)) {
+        else if (readCmds.includes(cmd)) {
 
-            // 1. Must be a reply
             if (!m.quoted) {
                 return reply(
                     '✘ Reply to a QR code image!\n\n' +
@@ -48,25 +53,18 @@ module.exports = {
                 );
             }
 
-            // 2. Check type — serialize.js puts the type in m.quoted.mtype
-            //    It will be 'imageMessage' for images
             const mtype = m.quoted.mtype || '';
             if (!mtype.includes('image')) {
                 return reply('✘ Reply to an *image* (not sticker/video/document)');
             }
 
             try {
-                // ✅ THE FIX:
-                // serialize.js line 91 gives us m.quoted.download() — use it directly.
-                // DO NOT use downloadMediaMessage(quoted) — quoted is unwrapped content,
-                // not a full Baileys { key, message } object, so it will always fail.
                 const buffer = await m.quoted.download();
 
                 if (!buffer || !buffer.length) {
                     return reply('𓄄 Could not download the image. Try again.');
                 }
 
-                // Load into canvas and scan
                 const img    = await loadImage(buffer);
                 const canvas = createCanvas(img.width, img.height);
                 const ctx    = canvas.getContext('2d');
