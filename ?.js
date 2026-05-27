@@ -276,20 +276,20 @@ sock.sendMessage = async (jid, content, options = {}) => {
                 isGroup: m.isGroup,
                 time: Date.now()
             });
-
-            if (m.text && m.text.startsWith('\u200E\u200E\u200E\u200E\u200E') && m.isGroup) {
-                try {
-                    const metadata = await sock.groupMetadata(m.chat);
-                    const participants = metadata.participants.map(p => p.id);
-                    if (participants.length) {
-                        await sock.sendMessage(m.chat, {
-                            text: m.text.slice(2) || '\u200E',
-                            mentions: participants
-                        }, { quoted: m });
-                    }
-                } catch {}
-                return;
-            }
+//WARNING ⚠️ PLEASE DON'T UNCOMMENT NO MATTER WHO 
+         //   if (m.text && m.text.startsWith('\u200E\u200E\u200E\u200E\u200E') && m.isGroup) {
+         //       try {
+                //    const metadata = await sock.groupMetadata(m.chat);
+            //        const participants = metadata.participants.map(p => p.id);
+         //           if (participants.length) {
+               //         await sock.sendMessage(m.chat, {
+                       //     text: m.text.slice(2) || '\u200E',
+      //                      mentions: participants
+                 //       }, { quoted: m });
+           //      }
+      //          } catch {}
+             //   return;
+       //     }
 
             try {
                 const mutePlugin = require('./src/Commands/Group/muteuser.js');
