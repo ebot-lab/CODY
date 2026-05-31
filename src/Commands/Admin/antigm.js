@@ -50,7 +50,7 @@ module.exports = {
         if (!sub) {
             const cfg = db[group];
             let actionDisplay;
-            if (cfg.action === 'delete') actionDisplay = '🗑️ DELETE';
+            if (cfg.action === 'delete') actionDisplay = ' ꙰⊕ DELETE';
             else if (cfg.action === 'warn') actionDisplay = '⚠︎ WARN (3x → KICK)';
             else if (cfg.action === 'kick') actionDisplay = 'ಠ_ಠ KICK';
             
@@ -71,7 +71,7 @@ module.exports = {
             db[group].enabled = true;
             saveDB(db);
             let actionText;
-            if (db[group].action === 'delete') actionText = '🗑️ DELETE';
+            if (db[group].action === 'delete') actionText = ' ꙰⊕ DELETE';
             else if (db[group].action === 'warn') actionText = '⚠︎ WARN (3x → KICK)';
             else if (db[group].action === 'kick') actionText = 'ಠ_ಠ KICK';
             return reply(`_*✓ Anti Status Mention*_ *ON*\nAction: *${actionText}*`);
