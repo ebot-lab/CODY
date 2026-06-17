@@ -23,7 +23,7 @@ module.exports = {
         
         // Edit the message to show result
         await sock.sendMessage(m.chat, {
-            text: `\`\`\`ⓘ Pong! ${latency}ms\`\`\`...`,
+            text: `\`\`\`ⓘ Pong! ${latency}ms\`\`\``,
             edit: sentMsg.key // This edits the original message
         });
     }
