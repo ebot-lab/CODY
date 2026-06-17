@@ -8,14 +8,14 @@ module.exports = {
     alias: ['pong', 'latency'],
     desc: 'Check bot response time',
     category: 'Bot',
-    reactions: { start: '📡', success: '🏷️' },
+    reactions: { start: '🏷️', success: '📡' },
     execute: async (sock, m, { reply, edit }) => {
         
         const start = Date.now();
         
         // Send initial loading message
         const sentMsg = await sock.sendMessage(m.chat, {
-            text: '_℘ pinging..._'
+            text: '_℘ Pinging..._'
         }, { quoted: m });
         
         // Calculate latency
@@ -23,7 +23,7 @@ module.exports = {
         
         // Edit the message to show result
         await sock.sendMessage(m.chat, {
-            text: `\`\`\`彡pong ${latency}ms\`\`\`...`,
+            text: `\`\`\`ⓘ Pong! ${latency}ms\`\`\`...`,
             edit: sentMsg.key // This edits the original message
         });
     }
