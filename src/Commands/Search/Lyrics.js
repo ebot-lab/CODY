@@ -1,65 +1,55 @@
+// lyrics.js
 const axios = require('axios');
-const config = require('../../../settings/config');
-
-const GATEWAY_URL = config.api?.gateway || '';
-const GATEWAY_TOKEN = config.api?.gatewayToken || '';
 
 module.exports = {
     name: 'lyrics',
-    alias: ['lyric', 'songtext'],
-    desc: 'Search for song lyrics',
+    alias: ['lyric', 'songlyrics'],
+    desc: 'Search and return song lyrics',
     category: 'Search',
     usage: '.lyrics <song title>',
+    examples: ['.lyrics Assurance by Davido', '.lyrics Shape of You'],
+    reactions: { start: '📥', success: '❤️‍🩹', error: '❔' },
 
     execute: async (sock, m, { args, reply }) => {
-        const title = args.join(' ').trim();
-        if (!title) return reply('ಠ_ಠ _*Provide a song title*_');
+        const query = args.join(' ').trim();
+        if (!query) return reply(`Usage: .lyrics <song title>`);
+
+        await sock.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
 
         try {
-            await sock.sendMessage(m.chat, { react: { text: '🎵', key: m.key } });
-            
-            const res = await axios.get(`${GATEWAY_URL}/search/lyrics?token=${GATEWAY_TOKEN}&title=${encodeURIComponent(title)}`);
-            const data = res.data;
-            
-            // Extract lyrics from the response
-            let lyricsText = '';
-            let artist = '';
-            let songTitle = '';
-            
-            if (data.data) {
-                lyricsText = data.data.lyrics || '';
-                artist = data.data.artist || '';
-                songTitle = data.data.title || title;
-            } else if (data.lyrics) {
-                lyricsText = data.lyrics;
-            } else if (typeof data === 'string') {
-                lyricsText = data;
+            const { data } = await axios.get(`https://docs.prexzyapis.com/search/lyrics?title=${encodeURIComponent(query)}`, {
+                timeout: 15000
+            });
+
+            if (!data.status || !data.data) {
+                await sock.sendMessage(m.chat, { react: { text: '❔', key: m.key } });
+                return reply(`No lyrics found for: ${query}`);
             }
+
+            const song = data.data;
             
-            if (!lyricsText) {
-                return reply('✘ No lyrics found for this song');
+            // Build clean caption - NO EMOJIS
+            let caption = `${song.title || 'Unknown'}\n`;
+            caption += `${song.artist || 'Unknown'}\n\n`;
+            caption += song.lyrics || 'No lyrics available';
+
+            // Split if too long (WhatsApp limit 4096 chars)
+            const maxLength = 4096;
+            if (caption.length > maxLength) {
+                const parts = caption.match(new RegExp(`[\\s\\S]{1,${maxLength}}`, 'g')) || [];
+                for (const part of parts) {
+                    await sock.sendMessage(m.chat, { text: part }, { quoted: m });
+                }
+            } else {
+                await sock.sendMessage(m.chat, { text: caption }, { quoted: m });
             }
-            
-            // Format the output
-            let text = `𖣘 *LYRICS*\n\n`;
-            if (artist && songTitle) {
-                text += `🎤 *${artist}* - *${songTitle}*\n\n`;
-            }
-            
-            // Trim if too long for WhatsApp (max ~4000 chars)
-            if (lyricsText.length > 3500) {
-                lyricsText = lyricsText.slice(0, 3500) + '...';
-            }
-            
-            text += lyricsText;
-            text += `\n\n_⚉ CRYSNOVA Gateway_`;
-            
-            await sock.sendMessage(m.chat, { text }, { quoted: m });
-            await sock.sendMessage(m.chat, { react: { text: '🎙️', key: m.key } });
-            
-        } catch (err) {
-            console.error('[LYRICS]', err.message);
-            reply('✘ Failed to fetch lyrics');
+
+            await sock.sendMessage(m.chat, { react: { text: '❤️‍🩹', key: m.key } });
+
+        } catch (error) {
+            console.error('[LYRICS ERROR]', error.message);
+            await sock.sendMessage(m.chat, { react: { text: '❔', key: m.key } });
+            reply('Error fetching lyrics.');
         }
     }
 };
