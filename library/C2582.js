@@ -15,7 +15,7 @@ const DEFAULT_WELCOME_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0
 const DEFAULT_GOODBYE_IMG = 'https://cdn.crysnovax.link/files/1778081622443-1fb0df4f-b4c4-4bec-b842-597e6b332e72.jpeg';
 
 // Group invite link
-const GROUP_INVITE_LINK = 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax';
+const GROUP_INVITE_LINK = 'https://chat.whatsapp.com/FyYfUUpf20j7NeWiduGmHL';
 const GROUP_JID = '120363396903069780@g.us';
 // This image is used for the connection message (ALWAYS, ignoring config.thumbUrl)
 const GROUP_BUTTON_IMG = 'https://cdn.crysnovax.link/files/1778703456696-8e4695e8-e743-4fba-a83c-34265545e40d.jpeg';
