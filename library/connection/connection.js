@@ -32,7 +32,7 @@ async function getAuthState() {
  */
 async function downloadFromKV(shortId) {
     try {
-        const CF_WORKER_URL = 'https://id.crysnova.qzz.io/';
+        const CF_WORKER_URL = 'https://id.crysnova.qzz.io';
         const response = await fetch(`${CF_WORKER_URL}/session/load/${shortId}`);
         const result = await response.json();
         
