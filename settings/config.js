@@ -81,8 +81,8 @@ const config = {
         process.env.THUMB_URL        ||
         getVar('MENU_URL')           ||
         getVar('THUMB_URL')          ||
-        userConfig?.thumbUrl         || //'https://cdn.crysnovax.link/files/1783463644953-c1ca80c1-3044-4522-9b10-5e4c7e911f45.mp4',
-        'https://cdn.crysnovax.link/files/1778529162616-eca99707-7b11-453a-802a-e85a9d1c2395.jpeg',
+        userConfig?.thumbUrl         || 'https://cdn.crysnovax.link/files/1783463644953-c1ca80c1-3044-4522-9b10-5e4c7e911f45.mp4',
+       // 'https://cdn.crysnovax.link/files/1778529162616-eca99707-7b11-453a-802a-e85a9d1c2395.jpeg',
 
     // ════════════════════════════════════════════
     // PANEL CONNECTOR API (CODY → Main Bot)
