@@ -1,10 +1,29 @@
-// © 2026 CODY AI | Powered by CRYSNOVA AI V2 Technology
+
+// © 2026 ZEE BOT | Powered by CRYSNOVA AI V2 Technology
 // Config reads from .env (primary) → getVar runtime (secondary) → defaults
 //
 
 const fs   = require('fs');
 const path = require('path');
 const { getVar } = require('../src/Plugin/configManager');
+
+const parseBoolean = (value, fallback) => {
+    if (value === undefined || value === null || value === '') return fallback;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value !== 0;
+    const normalized = String(value).trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+    return fallback;
+};
+
+const getBoolean = (key, userValue, fallback) => {
+    const envValue = process.env[key];
+    if (envValue !== undefined) return parseBoolean(envValue, fallback);
+    const runtimeValue = getVar(key, undefined);
+    if (runtimeValue !== undefined && runtimeValue !== null) return parseBoolean(runtimeValue, fallback);
+    return parseBoolean(userValue, fallback);
+};
 
 /*
 ──────────────────────────────────────────
@@ -53,13 +72,13 @@ const resolvedOwner =
 
 /*
 ──────────────────────────────────────────
-Config (CODY AI structure + CRYSNOVA V2 fields)
+Config (ZEE BOT structure + CRYSNOVA V2 fields)
 ──────────────────────────────────────────
 */
 const config = {
 
     // ════════════════════════════════════════════
-    // CODY IDENTITY
+    // BOT IDENTITY (ZEE BOT .env style)
     // ════════════════════════════════════════════
     owner: resolvedOwner,
 
@@ -81,75 +100,60 @@ const config = {
         process.env.THUMB_URL        ||
         getVar('MENU_URL')           ||
         getVar('THUMB_URL')          ||
-        userConfig?.thumbUrl         || 'https://cdn.crysnovax.link/files/1783463644953-c1ca80c1-3044-4522-9b10-5e4c7e911f45.mp4',
-       // 'https://cdn.crysnovax.link/files/1778529162616-eca99707-7b11-453a-802a-e85a9d1c2395.jpeg',
+        userConfig?.thumbUrl         ||
+    //    'https://cdn.crysnovax.link/files/1783469167623-6d58c43c-68b4-41ce-87ab-c0da1f615b28.mp4',
+        'https://cdn.crysnovax.link/files/1778529162616-eca99707-7b11-453a-802a-e85a9d1c2395.jpeg',
 
     // ════════════════════════════════════════════
-    // PANEL CONNECTOR API (CODY → Main Bot)
+    // PANEL CONNECTOR API (CODY)
     // ════════════════════════════════════════════
-    panelApiUrl:
-        process.env.PANEL_API_URL    ||
-        getVar('PANEL_API_URL')      ||
-        userConfig?.panelApiUrl      ||
-        'http://localhost:9000',
+    panelApiPort:
+        process.env.PANEL_API_PORT   ||
+        getVar('PANEL_API_PORT')     ||
+        userConfig?.panelApiPort     ||
+        9000,
+
+    panelRoot:
+        process.env.PANEL_ROOT       ||
+        getVar('PANEL_ROOT')         ||
+        userConfig?.panelRoot        ||
+        process.cwd(),
 
     // ════════════════════════════════════════════
-    // GITHUB (CODY → Repos)
-    // ════════════════════════════════════════════
-    github: {
-        token:
-            process.env.GITHUB_TOKEN     ||
-            getVar('GITHUB_TOKEN')       ||
-            userConfig?.github?.token    ||
-            '',
-        username:
-            process.env.GITHUB_USERNAME  ||
-            getVar('GITHUB_USERNAME')    ||
-            userConfig?.github?.username ||
-            'crysnovax',
-        repos: [
-            'crysnovax/CODY',
-            'crysnovax/CRYSNOVA_AI'
-        ],
-        memoryRepo: 'crysnovax/CODY',
-        memoryPath: 'memory'
-    },
-
-    // ════════════════════════════════════════════
-    // BOT STATUS / MODE
+    // BOT STATUS / MODE (ZEE BOT .env style)
     // ════════════════════════════════════════════
     status: {
-        public:   process.env.PUBLIC_MODE   !== undefined ? process.env.PUBLIC_MODE   === 'false'  : (getVar('PUBLIC_MODE')   ?? userConfig?.bot?.public   ?? true),
-        terminal: process.env.TERMINAL_MODE !== undefined ? process.env.TERMINAL_MODE !== 'false' : (getVar('TERMINAL_MODE') ?? userConfig?.bot?.terminal ?? true),
-        reactsw:  process.env.REACT_STATUS  !== undefined ? process.env.REACT_STATUS  !== 'false' : (getVar('REACT_STATUS')  ?? userConfig?.bot?.reactsw  ?? true)
+        public:   getBoolean('PUBLIC_MODE', userConfig?.bot?.public, true),
+        terminal: getBoolean('TERMINAL_MODE', userConfig?.bot?.terminal, true),
+        reactsw:  getBoolean('REACT_STATUS', userConfig?.bot?.reactsw, true)
     },
 
     // ════════════════════════════════════════════
-    // BOT MODE FLAGS
+    // BOT MODE FLAGS (ZEE BOT specific)
     // ════════════════════════════════════════════
     mode: {
-        autoRead:      process.env.AUTO_READ      !== 'false',
-        autoTyping:    process.env.AUTO_TYPING    === 'false',
-        autoRecording: process.env.AUTO_RECORDING === 'true',
-        alwaysOnline:  process.env.ALWAYS_ONLINE  !== 'true',
-        selfBot:       process.env.SELF_BOT       === 'true'
+        autoRead:      getBoolean('AUTO_READ', userConfig?.bot?.autoRead, true),
+        autoTyping:    getBoolean('AUTO_TYPING', userConfig?.bot?.autoTyping, false),
+        autoRecording: getBoolean('AUTO_RECORDING', userConfig?.bot?.autoRecording, false),
+        alwaysOnline:  getBoolean('ALWAYS_ONLINE', userConfig?.bot?.alwaysOnline, true),
+        selfBot:       getBoolean('SELF_BOT', userConfig?.bot?.selfBot, false)
     },
 
     // ════════════════════════════════════════════
-    // SETTINGS
+    // SETTINGS (CRYSNOVA V2 style with .env)
     // ════════════════════════════════════════════
     settings: {
         title:
             process.env.BOT_NAME         ||
             getVar('BOT_NAME')           ||
             userConfig?.bot?.name        ||
-            '𝗖𝗢𝗗𝗬 ⊹ 𝗔𝗜',
+            'CRYSNOVA AI',
 
         packname:
             process.env.BOT_NAME         ||
             getVar('BOT_NAME')           ||
             userConfig?.bot?.name        ||
-            '𝗖𝗢𝗗𝗬 ⊹ 𝗔𝗜',
+            'CRYSNOVA AI',
 
         prefix: (() => {
             const envPrefix = process.env.PREFIX;
@@ -170,9 +174,9 @@ const config = {
             return '.';
         })(),
 
-        description: 'CODY AI — Autonomous Developer Assistant powered by CRYSNOVA AI V2',
-        author:      'https://github.com/crysnovax/CODY',
-        footer:      '© CODY AI | Powered by CRYSNOVA AI',
+        description: 'Professional WhatsApp Bot — ZEE BOT powered by CRYSNOVA AI V2',
+        author:      'https://github.com/crysnovax/CRYSNOVA_AI',
+        footer:      '© ZEE BOT | Powered by CRYSNOVA AI',
 
         ownerJid:
             getVar('OWNER_JID')          ||
@@ -183,11 +187,11 @@ const config = {
             process.env.OWNER_NAME       ||
             getVar('OWNER_NAME')         ||
             userConfig?.owner?.name      ||
-            'CRYSNOVA'
+            'ZEE OWNER'
     },
 
     // ════════════════════════════════════════════
-    // PERMISSIONS
+    // PERMISSIONS (ZEE BOT .env style)
     // ════════════════════════════════════════════
     permissions: {
         owners: process.env.OWNER_NUMBERS
@@ -198,7 +202,7 @@ const config = {
     },
 
     // ════════════════════════════════════════════
-    // MESSAGES
+    // MESSAGES (CRYSNOVA V2 style)
     // ════════════════════════════════════════════
     message: {
         owner:   '`ⓘ OWNER ONLY 彡`',
@@ -215,7 +219,7 @@ const config = {
     },
 
     // ════════════════════════════════════════════
-    // AUTO REPLY
+    // AUTO REPLY (ZEE BOT feature)
     // ════════════════════════════════════════════
     autoReply: {
         enabled: process.env.AUTO_REPLY !== 'false',
@@ -228,23 +232,23 @@ const config = {
         greetings: {
             enabled:  true,
             keywords: ['hi', 'hello', 'hey', 'morning', 'afternoon', 'evening'],
-            response: 'Hello! 👋 How can CODY AI help you today?'
+            response: 'Hello! 👋 How can ZEE BOT help you today?'
         }
     },
 
     // ════════════════════════════════════════════
-    // NEWSLETTER
+    // NEWSLETTER (CRYSNOVA V2 style)
     // ════════════════════════════════════════════
     newsletter: {
         name:
             process.env.BOT_NAME ||
             getVar('BOT_NAME')   ||
-            'CODY AI',
+            'CRYSNOVA AI',
         id: '120363402922206865@newsletter'
     },
 
     // ════════════════════════════════════════════
-    // API KEYS
+    // API KEYS (ZEE BOT .env style)
     // ════════════════════════════════════════════
     api: {
         baseurl:
@@ -292,31 +296,31 @@ const config = {
     },
 
     // ════════════════════════════════════════════
-    // STICKER
+    // STICKER (CRYSNOVA V2 style)
     // ════════════════════════════════════════════
     sticker: {
         packname:
             process.env.BOT_NAME         ||
             getVar('BOT_NAME')           ||
-            'CODY AI',
+            'CRYSNOVA AI',
         author:
             process.env.STICKER_AUTHOR   ||
             getVar('STICKER_AUTHOR')     ||
-            'CODY AI'
+            'crysnovax'
     },
 
     // ════════════════════════════════════════════
-    // BRANDING
+    // BRANDING (ZEE BOT style)
     // ════════════════════════════════════════════
     branding: {
-        footer:  '© CODY AI | Powered by CRYSNOVA AI',
+        footer:  '© ZEE BOT | Powered by CRYSNOVA AI',
         channel: 'https://whatsapp.com/channel/0029Vb6pe77K0IBn48HLKb38',
-        group:   process.env.GROUP_LINK || 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax',
-        repo:    'https://github.com/crysnovax/CODY'
+        group:   process.env.GROUP_LINK || 'https://chat.whatsapp.com/Besbj8VIle1GwxKKZv1lax?mode=gi_t',
+        repo:    'https://github.com/crysnovax/CRYSNOVA_AI'
     },
 
     // ════════════════════════════════════════════
-    // LOGGING
+    // LOGGING (ZEE BOT style)
     // ════════════════════════════════════════════
     logging: {
         level:       process.env.LOG_LEVEL || 'silent',
@@ -325,7 +329,7 @@ const config = {
     },
 
     // ════════════════════════════════════════════
-    // STATUS HANDLER SETTINGS
+    // STATUS HANDLER SETTINGS (CRYSNOVA V2)
     // ════════════════════════════════════════════
     statusHandler: {
         autoView:

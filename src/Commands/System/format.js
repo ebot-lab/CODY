@@ -4,7 +4,7 @@ const axios = require('axios');
 const AdmZip = require('adm-zip');
 
 const CONFIG = {
-    repo: 'crysnovax/CODY',
+    repo: 'crysnovax/CRYSNOVA_AI',
     branch: 'main',
     tempDir: './.format_temp',
     backupDir: './.format_backup',
@@ -64,7 +64,7 @@ module.exports = {
     desc: 'Override bot files with latest from GitHub (preserves only sessions & .env)',
     category: 'Owner',
     owner: true,
-    usage: '.format confirm',
+    usage: `${prefix}format confirm`,
 
     execute: async (sock, m, { args, reply }) => {
         const confirmWord = args[0]?.toLowerCase();
@@ -81,7 +81,7 @@ module.exports = {
             );
         }
 
-        await reply(`𖣘 *FORMAT INITIATED*\n\n_Preserving sessions/ and .env..._`);
+        await reply(`${prefix}𖣘 *FORMAT INITIATED*\n\n_Preserving sessions/ and env..._`);
 
         try {
             // 1. Backup preserved items
@@ -148,7 +148,7 @@ module.exports = {
                     }
                 }
             } catch (e) {}
-            reply(`✘ *FORMAT FAILED*\n${err.message}\n\nBackup restored.`);
+            reply(`${prefix}✘ *FORMAT FAILED*\n${errmessage}\n\nBackup restored.`);
         }
     }
 };

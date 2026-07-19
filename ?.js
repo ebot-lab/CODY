@@ -16,6 +16,8 @@ const botFont = require('./src/Commands/Bot/botfont.js');
 
 const { translate } = require('./src/Commands/Core/✐.js');
 const { getLang }   = require('./src/Commands/Bot/botlang.js');
+const { setupMuteSchedules } = require('./src/Commands/Admin/Mute')
+//setupMuteSchedules(sock)
 
 const MARKER = '\u200E';
 
@@ -120,8 +122,11 @@ sock.sendMessage = async (jid, content, options = {}) => {
 
     setupStatusHandler(sock);
 
-    const { patchGroupEvents } = require('./src/Plugin/groupEventsPatch');
-    patchGroupEvents(sock);
+const { patchGroupEvents } = require('./src/Plugin/groupEventsPatch');
+patchGroupEvents(sock);
+
+const { setupPromotionGuard } = require('./src/Plugin/promotionGuard');
+setupPromotionGuard(sock);
 
     const econ = require('./src/Commands/Economy/econ.js');
   //  econ.startNotifChecker(sock);
@@ -326,13 +331,14 @@ try {
             if (m.mtype === 'reactionMessage') return;
             if (m.body && m.body.includes(AFK_MARKER)) return;
 
-            const _afkSender = (sock.user?.id || m.sender || '').replace(/:\d+@/, '@s.whatsapp.net');
-            if (m.key?.fromMe && afkCmd.disableAfk(_afkSender, m.chat)) {
+            const _afkSender = await afkCmd.resolveSenderPhoneJid(sock, m);
+            if (_afkSender && afkCmd.disableAfk(_afkSender, m.chat)) {
                 await sock.sendMessage(m.chat, { text: '```Welcome back!```' + AFK_MARKER }, { quoted: m });
             }
 
-            const afkUser = afkCmd.isAfkUserMentioned(m, mek, sock);
-            if (afkUser && afkUser !== m.sender) {
+            const afkUser = await afkCmd.isAfkUserMentioned(m, mek, sock);
+            const senderIsAfkUser = afkUser && await afkCmd.isSameIdentity(sock, afkUser, _afkSender);
+            if (afkUser && !senderIsAfkUser) {
                 const data = afkCmd.getAfk(afkUser, m.chat);
                 if (data) {
                     const elapsed = Date.now() - data.timestamp;
@@ -398,45 +404,18 @@ try {
             } catch (err) { console.error('[ANTISPAM ERROR]', err.message); }
 
             try {
-                const { mentionConfig } = require('./src/Commands/Owner/mention.js');
-                if (mentionConfig.active) {
-                    const config2 = require('./settings/config');
-                    const ownerNumber = (process.env.OWNER_NUMBER || config2.owner || '').replace(/[^0-9]/g, '');
-                    if (ownerNumber) {
-                        const ownerJid = `${ownerNumber}@s.whatsapp.net`;
-                        const botPnJid = (sock.user?.id || '').replace(/:\d+@/, '@s.whatsapp.net');
-                        const botLid = sock.user?.lid || '';
-                        const sender = (m.sender || '').replace(/:\d+@/, '@s.whatsapp.net');
-                        if (sender === botPnJid) return;
-
-                        const norm = (j) => (j || '').replace(/:\d+@/, '@').toLowerCase().trim();
-                        const rawMsg = mek.message || {};
-                        const ctxInfo = rawMsg.extendedTextMessage?.contextInfo ||
-                                        rawMsg.imageMessage?.contextInfo ||
-                                        rawMsg.videoMessage?.contextInfo ||
-                                        rawMsg.documentMessage?.contextInfo || {};
-                        const allMentions = [
-                            ...(ctxInfo.mentionedJid || []),
-                            ...(m.mentionedJid || []),
-                            ...(m.msg?.contextInfo?.mentionedJid || []),
-                        ];
-                        const uniqueMentions = [...new Set(allMentions)].filter(Boolean);
-                        let isMentioned = false;
-                        for (const jid of uniqueMentions) {
-                            const normalized = norm(jid);
-                            if (normalized === norm(ownerJid) || normalized === norm(botPnJid)) { isMentioned = true; break; }
-                            if (botLid && normalized === norm(botLid)) { isMentioned = true; break; }
-                        }
-                        if (isMentioned) {
-                            if (mentionConfig.action === 'react' && mentionConfig.emoji) {
-                                await sock.sendMessage(m.chat, { react: { text: mentionConfig.emoji, key: m.key } }).catch(() => {});
-                            } else if (mentionConfig.action === 'text' && mentionConfig.text) {
-                                await sock.sendMessage(m.chat, { text: mentionConfig.text }, { quoted: m }).catch(() => {});
-                            }
-                        }
+                const mention = require('./src/Commands/Owner/mention.js');
+                const { mentionConfig } = mention;
+                if (mentionConfig.active && await mention.isPrivilegedMentioned(sock, m, mek)) {
+                    if (mentionConfig.action === 'react' && mentionConfig.emoji) {
+                        await sock.sendMessage(m.chat, { react: { text: mentionConfig.emoji, key: m.key } }).catch(() => {});
+                    } else if (mentionConfig.action === 'text' && mentionConfig.text) {
+                        await sock.sendMessage(m.chat, { text: mentionConfig.text }, { quoted: m }).catch(() => {});
                     }
                 }
-            } catch {}
+            } catch (error) {
+                console.error('[MENTION HANDLER]', error.message);
+            }
 
             try {
                 const { handleShazamReply } = require('./src/Commands/Search/shazam.js');
@@ -487,7 +466,19 @@ try {
             try {
                 const antigm = require('./src/Commands/Admin/antigm.js');
                 if (antigm?.handleAntiGM) await antigm.handleAntiGM(sock, m, mek);
-            } catch {}
+            } catch (err) { console.error('[ANTIGM ERROR]', err.message); }
+
+            try {
+                const antigroupstatus = require('./src/Commands/Admin/antigroupstatus.js');
+                if (antigroupstatus?.handleAntiGroupStatus) {
+                    await antigroupstatus.handleAntiGroupStatus(sock, m, mek);
+                }
+            } catch (err) { console.error('[ANTIGROUPSTATUS ERROR]', err.message); }
+
+            try {
+                const antiforward = require('./src/Commands/Admin/antiforward.js');
+                if (antiforward?.handleAntiForward) await antiforward.handleAntiForward(sock, m, mek);
+            } catch (err) { console.error('[ANTIFORWARD ERROR]', err.message); }
 
             try {
                 const vvcmd = require('./src/Commands/Converter/vvcmd.js');

@@ -1,15 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const { Sticker } = require('wa-sticker-formatter');
+const { downloadContentFromMessage } = require('@crysnovax/baileys');
+// Pure-JS exif writer (node-webpmux) instead of wa-sticker-formatter -> sharp.
+const { addExif } = require('../../../library/exif');
 
 module.exports = {
     name: 'toround',
     alias: ['2round', 'makeround', 'tround'],
     category: 'Media',
     desc: 'Convert video/sticker to a large round sticker (10s limit)',
-    usage: '.toround (reply to video or sticker)',
+    usage: `${prefix}toround (reply to video or sticker)`,
 
     execute: async (sock, m, { reply }) => {
         const quoted = m.quoted || m;
@@ -75,25 +76,8 @@ module.exports = {
 
             let finalBuffer = fs.readFileSync(output);
 
-            // Add metadata
-            const sticker = new Sticker(finalBuffer, {
-                pack: 'CRYSNOVA AI',
-                author: 'crysnovax',
-                type: 'full',
-                quality: 70
-            });
-            finalBuffer = await sticker.toBuffer();
-
-            // Compress if too large
-            if (finalBuffer.length / 1024 > 500) {
-                const sticker2 = new Sticker(buffer, {
-                    pack: 'CRYSNOVA AI',
-                    author: 'crysnovax',
-                    type: 'full',
-                    quality: 40
-                });
-                finalBuffer = await sticker2.toBuffer();
-            }
+            // Add metadata (pure-JS, no sharp)
+            finalBuffer = await addExif(finalBuffer, 'CRYSNOVA AI', 'crysnovax', ['🔥']);
 
             if (finalBuffer.length / 1024 > 500) {
                 fs.unlinkSync(input);
@@ -109,7 +93,7 @@ module.exports = {
 
         } catch (e) {
             console.error('[TOROUND]', e);
-            reply(`✘ Failed: ${e.message}`);
+            reply(`${prefix}✘ Failed: ${emessage}`);
         }
     }
 };

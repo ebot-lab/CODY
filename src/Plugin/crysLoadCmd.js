@@ -6,6 +6,10 @@ const { addCommand, clearRegistry } = require('./crysCmd');
 
 const loadCommands = () => {
 
+    // Initialize global prefix before loading commands so ${prefix} in usage fields works
+    const { getVar } = require('./configManager');
+    global.prefix = getVar('PREFIX', '.');
+
     clearRegistry();
 
     const cmdPath = path.join(__dirname, '../Commands');
@@ -46,13 +50,21 @@ const loadCommands = () => {
                 const commandsArray = Array.isArray(cmdModule) ? cmdModule : [cmdModule];
 
                 for (const cmd of commandsArray) {
-                    cmd.category = cat;
-                    addCommand(cmd);
-                    total++;
+                    if (!cmd || typeof cmd !== 'object') {
+                        throw new TypeError('command export must be an object or array of objects');
+                    }
+                    if (typeof cmd.name !== 'string' || !cmd.name.trim()) {
+                        throw new TypeError('command is missing a valid name');
+                    }
+                    if (typeof cmd.execute !== 'function') {
+                        throw new TypeError(`command "${cmd.name}" is missing execute()`);
+                    }
+                    if (!cmd.category) cmd.category = cat;
+                    if (addCommand(cmd)) total++;
                 }
 
             } catch (err) {
-                console.log(chalk.red(`[CMD ERROR] ${file}: ${err.message}`));
+            //    console.log(chalk.red(`[CMD ERROR] ${file}: ${err.message}`));
             }
         }
     }

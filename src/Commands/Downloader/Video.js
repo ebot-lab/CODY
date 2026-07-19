@@ -11,7 +11,7 @@ module.exports = {
         try {
 
             if (!text) {
-                return reply("✘ Provide a video name\nExample: `.video Alan Walker Lily`");
+                return reply("✘ Provide a video name\nExample: `${prefix}video Alan Walker Lily`");
             }
 
             await sock.sendMessage(m.chat, {
@@ -65,8 +65,11 @@ module.exports = {
                 react: { text: "📤", key: m.key }
             });
 
+            // Download to buffer for reliable playback (URL streaming fails in WhatsApp)
+            const videoBuffer = await axios.get(videoDownloadUrl, { responseType: 'arraybuffer' });
+            
             await sock.sendMessage(m.chat, {
-                video: { url: videoDownloadUrl },
+                video: videoBuffer.data,
                 mimetype: "video/mp4",
                 caption: `🎬 ${data.title || vid.title}`
             }, { quoted: m });

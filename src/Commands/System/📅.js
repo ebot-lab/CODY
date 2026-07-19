@@ -4,7 +4,7 @@ const axios = require('axios');
 const AdmZip = require('adm-zip');
 
 const CONFIG = {
-    repo: 'crysnovax/CODY',
+    repo: 'crysnovax/CRYSNOVA_AI',
     branch: 'main',
     backupDir: './.update_backup',
     tempDir: './.update_temp',
@@ -65,7 +65,7 @@ module.exports = {
     category: 'Owner',
     ownerOnly: true,
     desc: 'Premium auto-updater with live progress bar',
-    usage: '.update',
+    usage: `${prefix}update`,
 
     execute: async (sock, m, { reply }) => {
         // Send initial message

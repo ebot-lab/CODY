@@ -303,8 +303,9 @@ const handleMessage = async (sock, m, store) => {
             return;
         }
 
-        if (cmd.ownerOnly   && !isOwner && !isDual)      return reply(cfg.message.owner   || 'Owner only!');
-        if (cmd.sudoOnly    && !isSudo)                  return reply(cfg.message.owner   || 'Sudo only!');
+        if (cmd.ownerOnly      && !isOwner && !isDual)             return reply(cfg.message.owner || 'Owner only!');
+        if (cmd.privilegedOnly && !isOwner && !isSudo && !isDual)  return reply('Owner, sudo, or dual users only!');
+        if (cmd.sudoOnly       && !isSudo)                          return reply(cfg.message.owner || 'Sudo only!');
         if (cmd.groupOnly   && !m.isGroup)               return reply(cfg.message.group   || 'Group only!');
         if (cmd.privateOnly && m.isGroup)                return reply(cfg.message.private || 'Private only!');
         // ── FIX: adminOnly now checks if SENDER is admin ──
@@ -327,8 +328,8 @@ const handleMessage = async (sock, m, store) => {
         console.log(chalk.cyan(`[CMD] ${prefix}${cmdName} | ${senderNum}${isOwner ? ' [OWNER]' : isDual ? ' [DUAL]' : isSudo ? ' [SUDO]' : ''}`));
 
         await cmd.execute(sock, m, {
-            args, text, prefix, isOwner, isSudo, isDual, isAdmin, isBotAdmin,
-            isGroup: m.isGroup, groupMeta, reply, config: cfg, store, getVar
+            args, text, prefix, isOwner, isSudo, isDual, isAdmin, isGroupAdmin: isAdmin,
+            isBotAdmin, isOwnerAdmin, isGroup: m.isGroup, groupMeta, reply, config: cfg, store, getVar
         });
 
         if (global.crysStats) global.crysStats.commands++;
@@ -344,4 +345,4 @@ const handleMessage = async (sock, m, store) => {
 };
 
 module.exports = { handleMessage };
-                        
+                            
