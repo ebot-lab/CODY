@@ -1,7 +1,7 @@
 const { randomUUID } = require('crypto');
 const axios = require('axios');
 const FormData = require('form-data');
-const { downloadContentFromMessage, getContentType } = require('@crysnovax/baileys-stable');
+const { downloadContentFromMessage, getContentType } = require('@crysnovax/baileys');
 
 const CDN_URL = 'https://cdn.crysnovax.link';
 
@@ -69,7 +69,7 @@ module.exports = {
     alias: ['shop', 'sell', 'catalog'],
     desc: 'Create a product listing with purchase button',
     category: 'Shop',
-    usage: '.product <title> | <price> | <description> | <url> (reply to image)',
+    usage: `${prefix}product <title> | <price> | <description> | <url> (reply to image)`,
     reactions: { start: '🛍️', success: '🥏', error: '❔' },
 
     execute: async (sock, m, { args, reply, prefix }) => {

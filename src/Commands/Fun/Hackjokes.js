@@ -6,15 +6,15 @@ module.exports = {
  alias: ['funjoke', 'randomjoke'],
  desc: 'Fetch a random programming joke',
  category: 'fun',
- usage: '.joke',
+ usage: `${prefix}joke`,
  owner: false,
 
  execute: async (sock, m, { reply }) => {
  try {
  const res = await fetch('https://v2.jokeapi.dev/joke/Programming?type=single');
  const data = await res.json();
- if (!data || !data.joke) return reply('⚠️ Could not fetch joke!');
- await reply(`⚉ Here's a random programming joke:\n\n${data.joke}`);
+ if (!data || !data.joke) return reply('❔ Could not fetch joke!');
+ await reply(`${prefix}⚉ Here's a random programming joke:\n\n${datajoke}`);
  } catch (err) {
  console.error('✘ Joke Plugin Error:', err.message);
  await reply('✘ Failed to fetch joke. Check your internet connection.');

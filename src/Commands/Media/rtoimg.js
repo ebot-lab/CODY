@@ -1,14 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const { downloadContentFromMessage } = require('@crysnovax/baileys');
 
 module.exports = {
     name: 'rtoimg',
     alias: ['rtoimage', 'rtovideo', 'rtovid', 'r2img'],
     category: 'Media',
     desc: 'Convert a round sticker back to image or video',
-    usage: '.rtoimg (reply to a round sticker)',
+    usage: `${prefix}rtoimg (reply to a round sticker)`,
 
     execute: async (sock, m, { reply }) => {
         const quoted = m.quoted || m;
@@ -85,7 +85,7 @@ module.exports = {
 
         } catch (e) {
             console.error('[RTOIMG]', e);
-            reply(`✘ Failed: ${e.message}`);
+            reply(`${prefix}✘ Failed: ${emessage}`);
         }
     }
 };

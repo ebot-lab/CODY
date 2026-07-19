@@ -1,85 +1,54 @@
-const { prepareWAMessageMedia, generateMessageIDV2 } = require('@crysnovax/baileys')
+const fetch = require('node-fetch');
 
 module.exports = {
-    name: 'invite',
-    alias: ['grouplink', 'glink'],
+    name: 'addme',
+    alias: [],
     category: 'Group',
     admin: true,
     group: true,
 
     execute: async (sock, m, { reply }) => {
         try {
-            if (!m.isGroup) return reply('`⟁⃝GROUP ONLY!℘`')
+            if (!m.isGroup) return reply('`⟁⃝GROUP ONLY!℘`');
 
-            const meta = await sock.groupMetadata(m.chat)
-            const groupName = meta.subject
+            const meta = await sock.groupMetadata(m.chat);
+            const groupName = meta.subject;
 
-            // ── Get invite code ───────────────────────
-            let inviteCode
+            // Get invite code
+            let inviteCode;
             try {
-                inviteCode = await sock.groupInviteCode(m.chat)
+                inviteCode = await sock.groupInviteCode(m.chat);
             } catch (err) {
-                return reply('`—͟͟͞͞𖣘 I need admin rights to generate the group link`')
+                // If bot is not admin, can't get invite code
+                return reply('`—͟͟͞͞𖣘 I need admin rights to generate the group link`');
             }
 
-            const inviteLink = `https://chat.whatsapp.com/${inviteCode}?mode=gi_t`
+            const inviteLink = `https://chat.whatsapp.com/${inviteCode}?mode=gi_t`;
 
-            // ── Get group photo URL ───────────────────
-            let photoUrl = null
+            // Thumbnail
+            let thumbnail = null;
             try {
-                photoUrl = await sock.profilePictureUrl(m.chat, 'image')
+                const pp = await sock.profilePictureUrl(m.chat, 'image');
+                thumbnail = await fetch(pp).then(r => r.buffer());
             } catch {}
 
-            // ── Upload via mediaTypeOverride:'thumbnail-link' ──
-            // Pass URL directly — Baileys' own HTTP layer fetches it
-            // with proper headers, avoiding quality degradation from
-            // manual fetch(). jpegThumbnail comes from the upload result
-            // itself — no manual extractImageThumb needed.
-            let hq = null
-            let smallThumb = null
-            if (photoUrl) {
-                try {
-                    const prepared = await prepareWAMessageMedia(
-                        { image: { url: photoUrl } },
-                        { upload: sock.waUploadToServer, mediaTypeOverride: 'thumbnail-link' }
-                    )
-                    hq = prepared.imageMessage
-                    smallThumb = hq?.jpegThumbnail ? Buffer.from(hq.jpegThumbnail) : null
-                } catch (err) {
-                    console.error('HQ THUMB UPLOAD ERROR:', err)
-                }
-            }
-
-            // ── Build proto and relay directly ────────
-            const message = {
+            // Send rich preview link
+            await sock.sendMessage(m.chat, {
                 extendedTextMessage: {
                     text: inviteLink,
                     matchedText: inviteLink,
                     canonicalUrl: inviteLink,
                     title: groupName,
-                    description: `${meta.participants.length} members · WhatsApp Group Invite`,
-                    previewType: 5, // IMAGE
-                    jpegThumbnail: smallThumb || undefined,
-                    ...(hq
-                        ? {
-                            thumbnailDirectPath: hq.directPath,
-                            mediaKey: hq.mediaKey,
-                            mediaKeyTimestamp: hq.mediaKeyTimestamp,
-                            thumbnailWidth: hq.width,
-                            thumbnailHeight: hq.height,
-                            thumbnailSha256: hq.fileSha256,
-                            thumbnailEncSha256: hq.fileEncSha256
-                        }
-                        : {})
-                }
-            }
-
-            const messageId = generateMessageIDV2(sock.user.id)
-            await sock.relayMessage(m.chat, message, { messageId })
+                    description: 'WhatsApp Group Invite',
+                    previewType: 1,
+                    jpegThumbnail: thumbnail
+                },
+                raw: true
+            }, { quoted: m });
 
         } catch (e) {
-            console.error('GLINK ERROR:', e)
-            reply(`𓆉 Error: ${e.message}`)
+            console.error('GLINK ERROR:', e);
+            reply(`${prefix}𓆉 Error: ${emessage}`);
         }
     }
-}
+};

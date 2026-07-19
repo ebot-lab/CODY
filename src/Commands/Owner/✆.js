@@ -1,6 +1,6 @@
 module.exports = {
-    name: 'repost',
-    alias: ['resend'],
+    name: 'resend',
+    alias: ['repost'],
     desc: 'Repost a replied message',
     category: 'Tools',
 
@@ -14,9 +14,9 @@ module.exports = {
             return reply(
                 '⊘ Provide target chat!\n\n' +
                 'Examples:\n' +
-                '• .repost 2348xxxx@s.whatsapp.net\n' +
-                '• .repost https://chat.whatsapp.com/xxxxx\n' +
-                '• .repost https://wa.me/2348xxxx'
+                '• .resend 2348xxxx@s.whatsapp.net\n' +
+                '• .resend https://chat.whatsapp.com/xxxxx\n' +
+                '• .resend https://wa.me/2348xxxx'
             );
         }
 
@@ -118,7 +118,7 @@ module.exports = {
 
         } catch (e) {
             console.error('REPOST ERROR:', e);
-            return reply(`⊘ Failed to repost: ${e.message}`);
+            return reply(`${prefix}⊘ Failed to repost: ${emessage}`);
         }
     }
 };

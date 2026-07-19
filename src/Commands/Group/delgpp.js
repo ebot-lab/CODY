@@ -13,7 +13,7 @@ module.exports = {
     alias: ['removegpp', 'deletegpp', 'rmgpp',],
     desc: 'Remove the current group\'s profile picture',
     category: 'group',
-    usage: '.delgpp',
+    usage: `${prefix}delgpp`,
 
     execute: async (sock, m, { reply, isGroupAdmin }) => {
         const chatId = m.key.remoteJid;
@@ -53,7 +53,7 @@ module.exports = {
             } else if (error?.message?.includes('no profile picture') || error?.message?.includes('not found')) {
                 errorMsg += '\n\nThis group doesn’t have a profile picture set right now.';
             } else if (error?.message?.includes('no-id') || error?.message?.includes('Illegal')) {
-                errorMsg += '\n\nBaileys version issue — make sure you’re using the latest @whiskeysockets/baileys.';
+                errorMsg += '\n\nBaileys version issue — make sure you’re using the latest @crysnovax/baileys.';
             }
 
             await reply(errorMsg);
